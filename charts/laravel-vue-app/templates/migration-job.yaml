@@ -2,17 +2,25 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: laravel-migration-{{ randAlphaNum 5 | lower }}
+  name: laravel-migration-{{ include "laravel-vue-app.fullname" . }}-{{ randAlphaNum 5 | lower }}
   namespace: {{ .Values.namespace }}
   labels:
     {{- include "laravel-vue-app.labels" . | nindent 4 }}
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: {{ .Values.migrations.hook.weight }}
+    helm.sh/hook-delete-policy: {{ .Values.migrations.hook.deletePolicy }}
 spec:
   template:
+    metadata:
+      labels:
+        app: laravel
+        tier: migration
     spec:
       restartPolicy: Never
       containers:
         - name: migration
           image: "{{ .Values.migrations.image }}:{{ .Values.migrations.tag }}"
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: laravel-config
@@ -20,15 +28,17 @@ spec:
                 name: laravel-secrets
           env:
             - name: DB_HOST
-              value: {{ .Values.env.DB_HOST }}
+              value: {{ .Values.env.DB_HOST | quote }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: db-credentials
                   key: password
           command:
-            - php
-            - artisan
-            - migrate
-            - --force
+            - /bin/sh
+            - -c
+            - |
+              echo "Running Laravel migrations..."
+              php artisan migrate --force
+              echo "Migrations completed successfully!"
 {{- end }}
