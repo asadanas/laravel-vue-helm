@@ -14,6 +14,13 @@ Create a default fully qualified app name.
 {{- end }}
 
 {{/*
+Chart name and version for labels - ADD THIS
+*/}}
+{{- define "laravel-vue-app.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "laravel-vue-app.labels" -}}
