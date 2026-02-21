@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: redis
+    {{- include "laravel-vue-app.labels" . | nindent 4 }}
+spec:
+  serviceName: redis-service
+  replicas: {{ .Values.replicas.redis }}
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          ports:
+            - containerPort: {{ .Values.redis.port }}
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: {{ .Values.redis.resources.requests.memory }}
+              cpu: {{ .Values.redis.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.redis.resources.limits.memory }}
+              cpu: {{ .Values.redis.resources.limits.cpu }}
+      volumes:
+        {{- if .Values.redis.persistence.enabled }}
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-pvc
+        {{- else }}
+        - name: redis-data
+          emptyDir: {}
+        {{- end }}

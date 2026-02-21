@@ -1,0 +1,114 @@
+# ============================================
+# NAMESPACE
+# ============================================
+namespace: laravel-app
+
+# ============================================
+# IMAGES (YOUR EXACT IMAGES)
+# ============================================
+images:
+  app:
+    repository: asadanas/laravel-vue-spa-2026-app
+    tag: "latest"
+    pullPolicy: Always
+  nginx:
+    repository: asadanas/laravel-vue-spa-2026-nginx
+    tag: "latest"
+    pullPolicy: Always
+
+# ============================================
+# REPLICAS (YOUR EXACT COUNTS)
+# ============================================
+replicas:
+  app: 2
+  nginx: 2
+  redis: 1
+
+# ============================================
+# ENVIRONMENT VARIABLES (YOUR EXACT CONFIG)
+# ============================================
+env:
+  APP_NAME: "Laravel Vue Spa"
+  APP_ENV: "production"
+  APP_DEBUG: "true"   # Matches your configmap.yaml
+  APP_LOG_LEVEL: "debug"
+  APP_URL: "https://spa.getnatai.com"  # Updated for production
+  
+  LOG_CHANNEL: "stack"
+  LOG_LEVEL: "debug"
+  
+  DB_CONNECTION: "mysql"
+  DB_HOST: "45.125.222.194"
+  DB_PORT: "3306"
+  DB_DATABASE: "laravel"
+  DB_USERNAME: "root"
+  
+  BROADCAST_DRIVER: "log"
+  CACHE_DRIVER: "file"          # Matches your configmap.yaml
+  QUEUE_CONNECTION: "sync"      # Matches your configmap.yaml
+  SESSION_DRIVER: "file"        # Matches your configmap.yaml
+  SESSION_LIFETIME: "120"
+  
+  REDIS_HOST: "redis-service"   # Matches your configmap.yaml
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: "null"        # Matches your configmap.yaml
+  
+  MAIL_MAILER: "smtp"
+  MAIL_HOST: "smtp.mailtrap.io"
+  MAIL_PORT: "2525"
+  MAIL_USERNAME: "null"
+  MAIL_PASSWORD: "null"
+  MAIL_ENCRYPTION: "null"
+  MAIL_FROM_ADDRESS: "null"
+  MAIL_FROM_NAME: "${APP_NAME}"
+  
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_DEFAULT_REGION: "us-east-1"
+  AWS_BUCKET: ""
+  
+  PUSHER_APP_ID: ""
+  PUSHER_APP_KEY: ""
+  PUSHER_APP_CLUSTER: "mt1"
+  MIX_PUSHER_APP_KEY: ""
+  MIX_PUSHER_APP_CLUSTER: "mt1"
+  
+  JWT_TTL: "1440"
+
+# ============================================
+# MIGRATIONS (YOUR EXACT BEHAVIOR)
+# ============================================
+migrations:
+  enabled: false  # Set to true ONLY when you want to run migrations
+  image: asadanas/laravel-vue-spa-2026-app
+  tag: "latest"
+
+# ============================================
+# REDIS (YOUR EXACT CONFIG)
+# ============================================
+redis:
+  image: redis:7-alpine
+  port: 6379
+  persistence:
+    enabled: true
+    storageClass: "nfs-csi"
+    size: "5Gi"
+    accessMode: "ReadWriteOnce"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# ============================================
+# INGRESS (REPLACES YOUR NODEPORT)
+# ============================================
+ingress:
+  enabled: true
+  className: "nginx"  # Change if using different ingress controller (e.g., "traefik")
+  host: "spa.getnatai.com"
+  tls:
+    enabled: true
+    secretName: "spa-getnatai-com-tls"

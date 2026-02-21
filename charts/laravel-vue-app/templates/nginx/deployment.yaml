@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-nginx
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: laravel
+    tier: frontend
+    {{- include "laravel-vue-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas.nginx }}
+  selector:
+    matchLabels:
+      app: laravel
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: laravel
+        tier: frontend
+    spec:
+      containers:
+        - name: nginx
+          image: "{{ .Values.images.nginx.repository }}:{{ .Values.images.nginx.tag }}"
+          imagePullPolicy: {{ .Values.images.nginx.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: APP_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: laravel-config
+                  key: APP_URL

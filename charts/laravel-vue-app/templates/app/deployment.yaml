@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-app
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: laravel
+    tier: backend
+    {{- include "laravel-vue-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas.app }}
+  selector:
+    matchLabels:
+      app: laravel
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: laravel
+        tier: backend
+    spec:
+      containers:
+        - name: app
+          image: "{{ .Values.images.app.repository }}:{{ .Values.images.app.tag }}"
+          imagePullPolicy: {{ .Values.images.app.pullPolicy }}
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: laravel-config
+            - secretRef:
+                name: laravel-secrets
+          env:
+            - name: DB_HOST
+              value: {{ .Values.env.DB_HOST }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password
+            - name: RUN_MIGRATIONS
+              value: "false"  # YOUR EXACT CONFIG (migrations run via separate Job)
