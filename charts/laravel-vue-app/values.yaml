@@ -79,7 +79,7 @@ env:
 # MIGRATIONS (YOUR EXACT BEHAVIOR)
 # ============================================
 migrations:
-  enabled: false  # Set to true ONLY when you want to run migrations
+  enabled: ture  # Set to true ONLY when you want to run migrations
   image: asadanas/laravel-vue-spa-2026-app
   tag: "latest"
 
